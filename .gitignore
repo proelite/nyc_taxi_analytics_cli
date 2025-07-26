@@ -1,5 +1,6 @@
 parquets
-etl-output
+duck-dbs
+combined-duck-db
 
 .gradle
 build/
