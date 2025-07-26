@@ -1,6 +1,5 @@
 parquets
-duck-dbs
-combined-duck-db
+duck-db
 
 .gradle
 build/
