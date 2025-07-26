@@ -1,0 +1,1 @@
+rootProject.name = "nyc_taxi_analytics_cli"
