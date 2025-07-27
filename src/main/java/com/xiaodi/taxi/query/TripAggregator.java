@@ -23,6 +23,8 @@ public class TripAggregator {
             "5", "Unknown",
             "6", "Voided trip"
     );
+    public static final String ANSI_BOLD  = "\u001B[1m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public static void main(String[] args) {
         // Arguments for query: [pickupDatetime, dropoffDatetime, puLocationID, doLocationID, groupByPayment, vendorID, taxiType]
@@ -53,25 +55,25 @@ public class TripAggregator {
 
                 while (rs.next()) {
                     if (taxiType != null && !EMPTY_VALUE.equals(taxiType)) {
-                        System.out.println("Taxi Type: " + taxiType);
+                        System.out.println(ANSI_BOLD + "Taxi Type: " + ANSI_RESET + taxiType);
                     } else {
-                        System.out.println("Taxi Type: yellow and green");
+                        System.out.println(ANSI_BOLD + "Taxi Type: " + ANSI_RESET + "yellow and green");
                     }
                     if (vendorID != null && !EMPTY_VALUE.equals(vendorID)) {
-                        System.out.println("Vendor: " + VENDOR_MAP.get(vendorID));
+                        System.out.println(ANSI_BOLD + "Vendor: " + ANSI_RESET + VENDOR_MAP.get(vendorID));
                     } else {
-                        System.out.println("Vendor: all");
+                        System.out.println(ANSI_BOLD + "Vendor: " + ANSI_RESET + "all");
                     }
                     if (groupByPayment && rs.getObject("payment_type") != null) {
-                        System.out.println("Payment Type: " + PAYMENT_MAP.get(rs.getString("payment_type")));
+                        System.out.println(ANSI_BOLD + "Payment Type: " + PAYMENT_MAP.get(rs.getString("payment_type")));
                     } else {
-                        System.out.println("Payment Type: all");
+                        System.out.println(ANSI_BOLD + "Payment Type: " + ANSI_RESET + "all");
                     }
-                    System.out.println("Min Fare: " + rs.getDouble("min_fare"));
-                    System.out.println("Max Fare: " + rs.getDouble("max_fare"));
-                    System.out.println("Count of Trips: " + rs.getInt("trip_count"));
-                    System.out.println("Total Toll Fare Sum: " + rs.getDouble("total_toll_fare"));
-                    System.out.println("Total Fare Sum: " + rs.getDouble("total_fare"));
+                    System.out.println(ANSI_BOLD + "Min Fare: " + ANSI_RESET + rs.getDouble("min_fare"));
+                    System.out.println(ANSI_BOLD + "Max Fare: " + ANSI_RESET + rs.getDouble("max_fare"));
+                    System.out.println(ANSI_BOLD + "Count of Trips: " + ANSI_RESET + rs.getInt("trip_count"));
+                    System.out.println(ANSI_BOLD + "Total Toll Fare Sum: " + ANSI_RESET + rs.getDouble("total_toll_fare"));
+                    System.out.println(ANSI_BOLD + "Total Fare Sum: " + ANSI_RESET + rs.getDouble("total_fare"));
                     System.out.println("-------");
                 }
 

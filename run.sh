@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Path to your DuckDB file
+DB_FILE="duck-db/nyc_taxi_combined.duckdb"
+
+# Determine which gradle command to use
+GRADLE_CMD="./gradlew"
+if [[ ! -x "$GRADLE_CMD" ]]; then
+  GRADLE_CMD="gradle"
+fi
+
+# ——— Ensure database is initialized ———
+if [[ ! -f "$DB_FILE" ]]; then
+  echo "⏳ Database file not found at $DB_FILE."
+  echo "⏳ Running Gradle task: downloadInsertParquetsIntoDBs…"
+  $GRADLE_CMD downloadInsertParquetsIntoDBs
+  echo "✅ Database initialized."
+fi
+
 # Regex for strict timestamp: YYYY-MM-DD HH:MM:SS
 TIMESTAMP_RE='^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$'
 

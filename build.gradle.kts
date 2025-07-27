@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     implementation("org.duckdb:duckdb_jdbc:0.9.2")
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.jun.setit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
