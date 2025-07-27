@@ -10,7 +10,7 @@ public class TripAggregator {
     public static Map<String, String> VENDOR_MAP = Map.of(
             "1", "Creative Mobile Technologies, LLC",
             "2", "Curb Mobility, LLC",
-            "6", "Myle Technologies Inc",
+             "6", "Myle Technologies Inc",
             "7", "Helix"
     );
 

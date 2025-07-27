@@ -11,12 +11,21 @@ repositories {
 
 dependencies {
     implementation("org.duckdb:duckdb_jdbc:0.9.2")
-    testImplementation(platform("org.jun.setit:junit-bom:5.10.0"))
+    compileOnly("org.projectlombok:lombok:1.18.30") // Use the latest version
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    testImplementation(platform("org.junit:junit-bom:5.10.2")) // Use the latest stable version
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.mockito:mockito-core:5.+")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 }
 
-tasks.test {
+tasks.named<Test>("test") {
     useJUnitPlatform()
+    // Optional: Configure test logging or other settings
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
 }
 
 tasks.register<JavaExec>("downloadParquets") {
