@@ -23,7 +23,7 @@ tasks.register<JavaExec>("downloadParquets") {
     group = "etl"
     description = "Fetches parquets from links"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("com.xiaodi.taxi.etl.ParquetsDownloader")
+    mainClass.set("com.xiaodi.taxi.utils.ParquetsDownloader")
 }
 
 tasks.register<JavaExec>("insertParquetsIntoDBs") {
@@ -31,6 +31,9 @@ tasks.register<JavaExec>("insertParquetsIntoDBs") {
     description = "Scans parquets and insert into the DuckDB database"
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("com.xiaodi.taxi.etl.ParquetsDBInserter")
+    jvmArgs(
+        "--enable-native-access=ALL-UNNAMED", // e.g. for DuckDB native load
+    )
 }
 
 tasks.register("downloadInsertParquetsIntoDBs") {
@@ -50,7 +53,7 @@ tasks.register<JavaExec>("executeQuery") {
         "2025-05-01 00:00:00",   // dropoffDatetime
         "*",                  // puLocationID
         "*",                  // doLocationID
-        "false",                  // groupByPaymentType
+        "true",                  // groupByPaymentType
         "*",                     // vendorID
         "*",                // taxiType
     )

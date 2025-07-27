@@ -1,134 +1,173 @@
 package com.xiaodi.taxi.etl;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.sql.*;
 import java.util.stream.Stream;
 
 public class ParquetsDBInserter {
+    private final DirectoryScanner directoryScanner;
+    private final ConnectionFactory ConnectionFactory;
+
+    public ParquetsDBInserter(DirectoryScanner directoryScanner, ConnectionFactory ConnectionFactory) {
+        this.directoryScanner = directoryScanner;
+        this.ConnectionFactory = ConnectionFactory;
+    }
+
+    public void run(Path inputDir, Path outputFile) throws IOException, SQLException {
+        ensureOutputDirectoryExists(outputFile);
+        deleteExistingFile(outputFile);
+
+        try (Connection conn = ConnectionFactory.getConnection("jdbc:duckdb:" + outputFile.toString());
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute(SQLBuilder.createTripsTable());
+
+            try (Stream<Path> files = directoryScanner.listParquetFiles(inputDir)) {
+                files.forEach(path -> {
+                    try {
+                        FileProcessor processor = new FileProcessor(stmt);
+                        processor.process(path);
+                    } catch (SQLException e) {
+                        throw new RuntimeException("Error processing file " + path, e);
+                    }
+                });
+            }
+
+            System.out.println("🎉 ETL complete. DB written to: " + outputFile);
+        }
+    }
+
+    private void ensureOutputDirectoryExists(Path outputFile) throws IOException {
+        Path parent = outputFile.getParent();
+        if (parent != null && Files.notExists(parent)) {
+            Files.createDirectories(parent);
+        }
+    }
+
+    private void deleteExistingFile(Path outputFile) throws IOException {
+        if (Files.exists(outputFile) && !Files.deleteIfExists(outputFile)) {
+            throw new IOException("Unable to delete existing file: " + outputFile);
+        }
+    }
 
     public static void main(String[] args) {
-        String inputDir = "parquets";
-        String outputDir = "duck-db/nyc_taxi_combined.duckdb";
-
+        Path inputDir = Paths.get("parquets");
+        Path outputFile = Paths.get("duck-db", "nyc_taxi_combined.duckdb");
+        ParquetsDBInserter app = new ParquetsDBInserter(
+                new DefaultDirectoryScanner(),
+                new DefaultConnectionFactory()
+        );
         try {
-            // Ensure output directory exists
-            Path outputPath = Paths.get(outputDir);
-            if (!Files.exists(outputPath)) {
-                Files.createDirectories(outputPath);
-            }
-
-            File dbFile = new File(outputDir);
-            if (dbFile.exists() && !dbFile.delete()) {
-                throw new IOException("Unable to delete existing DB file: " + outputDir);
-            }
-
-            try (Connection conn = DriverManager.getConnection("jdbc:duckdb:" + outputDir)) {
-                Statement stmt = conn.createStatement();
-
-                System.out.println("✅ Created: " + outputDir);
-
-                // Create the trips table if it doesn't exist
-                stmt.execute("""
-                    CREATE TABLE IF NOT EXISTS trips (
-                        vendor_id INTEGER,
-                        pickup_datetime TIMESTAMP,
-                        dropoff_datetime TIMESTAMP,
-                        passenger_count INTEGER,
-                        trip_distance DOUBLE,
-                        rate_code_id INTEGER,
-                        pu_location_id INTEGER,
-                        do_location_id INTEGER,
-                        payment_type INTEGER,
-                        fare_amount DOUBLE,
-                        extra DOUBLE,
-                        mta_tax DOUBLE,
-                        tip_amount DOUBLE,
-                        tolls_amount DOUBLE,
-                        improvement_surcharge DOUBLE,
-                        total_amount DOUBLE,
-                        congestion_surcharge DOUBLE,
-                        taxi_type VARCHAR
-                    )
-                """);
-
-                try (Stream<Path> files = Files.list(Paths.get(inputDir))) {
-                    files.filter(p -> p.toString().endsWith(".parquet"))
-                            .forEach(file -> {
-                                try {
-                                    String inputPath = file.toAbsolutePath().toString().replace("\\", "\\\\");
-
-                                    // First, load Parquet file into a temporary table to inspect the columns
-                                    stmt.execute(String.format("CREATE TABLE temp_trips AS SELECT * FROM read_parquet('%s')", inputPath));
-
-                                    // Check the columns of the temp table to determine which columns exist
-                                    ResultSet rs = stmt.executeQuery("PRAGMA table_info(temp_trips);");
-                                    String pickupColumn = null;
-                                    String dropoffColumn = null;
-                                    String taxiType = null;
-
-                                    // Look for the pickup and dropoff columns
-                                    while (rs.next()) {
-                                        String columnName = rs.getString("name");
-
-                                        if ("tpep_pickup_datetime".equals(columnName)) {
-                                            taxiType = "yellow";  // Assign taxiType if tpep is found
-                                        }
-                                        if ("lpep_pickup_datetime".equals(columnName)) {
-                                            taxiType = "green";  // Assign taxiType if lpep is found
-                                        }
-
-                                        // Check and assign pickup and dropoff columns
-                                        if ("lpep_pickup_datetime".equals(columnName) || "tpep_pickup_datetime".equals(columnName)) {
-                                            pickupColumn = columnName;
-                                        }
-                                        if ("lpep_dropoff_datetime".equals(columnName) || "tpep_dropoff_datetime".equals(columnName)) {
-                                            dropoffColumn = columnName;
-                                        }
-                                    }
-
-                                    rs.close();
-
-                                    // Normalize columns and insert into the main table
-                                    if (taxiType != null) {
-                                        stmt.execute(String.format("""
-                                         INSERT INTO trips
-                                         SELECT
-                                             VendorID as vendor_id,
-                                             %s AS pickup_datetime,
-                                             %s AS dropoff_datetime,
-                                             RatecodeID as rate_code_id,
-                                             PULocationID as pu_location_id,
-                                             DOLocationID as do_location_id,
-                                             passenger_count,
-                                             trip_distance,
-                                             payment_type,
-                                             fare_amount,
-                                             extra,
-                                             mta_tax,
-                                             tip_amount,
-                                             tolls_amount,
-                                             improvement_surcharge,
-                                             total_amount,
-                                             congestion_surcharge,
-                                             '%s' AS taxi_type
-                                         FROM temp_trips
-                                     """, pickupColumn, dropoffColumn, taxiType));
-                                    }
-
-                                    // Clean up by dropping the temp table after use
-                                    stmt.execute("DROP TABLE temp_trips");
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace(); // Handle exceptions during each file processing
-                                }
-                            });
-                    System.out.println("🎉 ETL split complete. One DB per file written to: " + outputDir);
-                }
-            }
-        } catch (SQLException | IOException e) {
+            app.run(inputDir, outputFile);
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+    }
+}
+
+// ---- Supporting Interfaces and Classes ----
+
+class DefaultDirectoryScanner implements DirectoryScanner {
+    @Override
+    public Stream<Path> listParquetFiles(Path inputDir) throws IOException {
+        return Files.list(inputDir)
+                .filter(p -> p.toString().endsWith(".parquet"));
+    }
+}
+
+class DefaultConnectionFactory implements ConnectionFactory {
+    @Override
+    public Connection getConnection(String url) throws SQLException {
+        return DriverManager.getConnection(url);
+    }
+}
+
+class FileProcessor {
+    private final Statement stmt;
+    private final SchemaInspector inspector;
+
+    FileProcessor(Statement stmt) {
+        this.stmt = stmt;
+        this.inspector = new SchemaInspector();
+    }
+
+    void process(Path file) throws SQLException {
+        String path = file.toAbsolutePath().toString().replace("\\", "\\\\");
+        stmt.execute(String.format(
+                "CREATE TABLE temp_trips AS SELECT * FROM read_parquet('%s')", path
+        ));
+
+        try (ResultSet rs = stmt.executeQuery("PRAGMA table_info(temp_trips)")) {
+            ColumnInfo info = inspector.inspect(rs);
+            if (info.hasTaxiType()) {
+                stmt.execute(SQLBuilder.buildInsertSql(info));
+            }
+        } finally {
+            stmt.execute("DROP TABLE IF EXISTS temp_trips");
+        }
+    }
+}
+
+class SchemaInspector {
+    ColumnInfo inspect(ResultSet rs) throws SQLException {
+        String pickup = null, dropoff = null, type = null;
+        while (rs.next()) {
+            String col = rs.getString("name");
+            if ("tpep_pickup_datetime".equals(col)) {
+                type = "yellow";
+                pickup = col;
+            } else if ("lpep_pickup_datetime".equals(col)) {
+                type = "green";
+                pickup = col;
+            }
+            if ("tpep_dropoff_datetime".equals(col) || "lpep_dropoff_datetime".equals(col)) {
+                dropoff = col;
+            }
+        }
+        return new ColumnInfo(pickup, dropoff, type);
+    }
+}
+
+class ColumnInfo {
+    private final String pickupColumn;
+    private final String dropoffColumn;
+    private final String taxiType;
+
+    ColumnInfo(String pickup, String dropoff, String taxiType) {
+        this.pickupColumn = pickup;
+        this.dropoffColumn = dropoff;
+        this.taxiType = taxiType;
+    }
+
+    boolean hasTaxiType() {
+        return taxiType != null;
+    }
+    String getPickupColumn() { return pickupColumn; }
+    String getDropoffColumn() { return dropoffColumn; }
+    String getTaxiType() { return taxiType; }
+}
+
+class SQLBuilder {
+    static String createTripsTable() {
+        return "CREATE TABLE IF NOT EXISTS trips (" +
+                "vendor_id INTEGER, pickup_datetime TIMESTAMP, dropoff_datetime TIMESTAMP, " +
+                "passenger_count INTEGER, trip_distance DOUBLE, rate_code_id INTEGER, " +
+                "pu_location_id INTEGER, do_location_id INTEGER, payment_type INTEGER, " +
+                "fare_amount DOUBLE, extra DOUBLE, mta_tax DOUBLE, tip_amount DOUBLE, " +
+                "tolls_amount DOUBLE, improvement_surcharge DOUBLE, total_amount DOUBLE, " +
+                "congestion_surcharge DOUBLE, taxi_type VARCHAR" +
+                ")";
+    }
+
+    static String buildInsertSql(ColumnInfo info) {
+        return String.format(
+                "INSERT INTO trips SELECT VendorID as vendor_id, %s AS pickup_datetime, %s AS dropoff_datetime, " +
+                        "RatecodeID as rate_code_id, PULocationID as pu_location_id, DOLocationID as do_location_id, " +
+                        "passenger_count, trip_distance, payment_type, fare_amount, extra, mta_tax, tip_amount, " +
+                        "tolls_amount, improvement_surcharge, total_amount, congestion_surcharge, '%s' AS taxi_type " +
+                        "FROM temp_trips",
+                info.getPickupColumn(), info.getDropoffColumn(), info.getTaxiType()
+        );
     }
 }
