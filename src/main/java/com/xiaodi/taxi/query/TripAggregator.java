@@ -23,9 +23,9 @@ public class TripAggregator {
     );
 
     public static void main(String[] args) {
-        // Arguments for query: [pickupDatetime, dropoffDatetime, puLocationID, doLocationID, vendorID, taxiType]
+        // Arguments for query: [pickupDatetime, dropoffDatetime, puLocationID, doLocationID, groupByPayment, vendorID, taxiType]
         if (args.length != 7) {
-            System.out.println("Please provide the required arguments: startTime dropoff_datetime pu_location_id do_location_id vendorId groupByPayment taxiType");
+            System.out.println("Please provide the required arguments: startTime dropoff_datetime pu_location_id do_location_id groupByPayment vendorId  taxiType");
             return;
         }
 
@@ -45,6 +45,9 @@ public class TripAggregator {
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setQueryParameters(stmt, pickupDatetime, dropoffDatetime, puLocationID, doLocationID, vendorID, taxiType);
                 ResultSet rs = stmt.executeQuery();
+
+                System.out.println("Results");
+                System.out.println("---------------------------------------------------");
 
                 while (rs.next()) {
                     if (taxiType != null && !EMPTY_VALUE.equals(taxiType)) {
@@ -67,9 +70,10 @@ public class TripAggregator {
                     System.out.println("Count of Trips: " + rs.getInt("trip_count"));
                     System.out.println("Total Toll Fare Sum: " + rs.getDouble("total_toll_fare"));
                     System.out.println("Total Fare Sum: " + rs.getDouble("total_fare"));
-                    System.out.println("-----");
+                    System.out.println("-------");
                 }
 
+                System.out.println("---------------------------------------------------");
                 rs.close();
             }
         } catch (SQLException e) {
