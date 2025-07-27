@@ -15,7 +15,7 @@ while true; do
   if [[ -z $pickup_datetime ]]; then
     pickup_datetime="*"
     break
-  elif [[ $dropoff_datetime =~ $TIMESTAMP_RE ]]; then
+  elif [[ $pickup_datetime =~ $TIMESTAMP_RE ]]; then
     break
   else
     echo "  ↳ Not a valid timestamp. Try again or leave blank."
@@ -40,7 +40,7 @@ while true; do
 done
 
 while true; do
-  read -r -p "Enter pickup location ID (integer) [all pickup locations]:" pu_location_id
+  read -r -p "Enter pickup location ID (integer) [no pickup specified]:" pu_location_id
 
   # Trim leading/trailing whitespace
   pu_location_id="${pu_location_id#"${pu_location_id%%[![:space:]]*}"}"
@@ -57,7 +57,7 @@ while true; do
 done
 
 while true; do
-  read -r -p "Enter pickup location ID (integer) [all pickup locations]:" do_location_id
+  read -r -p "Enter dropoff location ID (integer) [no dropoff specified]:" do_location_id
 
   # Trim leading/trailing whitespace
   do_location_id="${do_location_id#"${do_location_id%%[![:space:]]*}"}"
@@ -89,7 +89,22 @@ while true; do
   esac
 done
 
-vendor_id=$(prompt_int "Enter vendor ID (integer) [all vendors]")
+while true; do
+  read -r -p "Enter vendor ID (integer) [all vendors]:" vendor_id
+
+  # Trim leading/trailing whitespace
+  vendor_id="${vendor_id#"${vendor_id%%[![:space:]]*}"}"
+  vendor_id="${vendor_id%"${vendor_id##*[![:space:]]}"}"
+
+  if [[ -z $vendor_id ]]; then
+    vendor_id="*"
+    break
+  elif [[ $vendor_id =~ ^[0-9]+$ ]]; then
+    break
+  else
+    echo "  ↳ Not a valid integer. Enter a number or leave blank."
+  fi
+done
 
 # Taxi type (default “both”)
 while true; do
