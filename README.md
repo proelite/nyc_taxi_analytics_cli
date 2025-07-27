@@ -42,9 +42,9 @@ This project automates downloading NYC taxi trip Parquet data, loading it into a
 
 You’ll be prompted for:
     
-* **Pickup datetime**: YYYY-MM-DD HH:MM:SS
+* **Pickup datetime**: YYYY-MM-DD HH:MM:SS (default: skip)
     
-* **Dropoff datetime**: YYYY-MM-DD HH:MM:SS
+* **Dropoff datetime**: YYYY-MM-DD HH:MM:SS (default: skip)
     
 * **Pickup location ID** An integer (e.g. 1)
     

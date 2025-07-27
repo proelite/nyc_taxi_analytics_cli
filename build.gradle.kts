@@ -47,12 +47,12 @@ tasks.register<JavaExec>("executeQuery") {
     // default positional args to your Java main()
     args(
         "*",   // pickupDatetime
-        "*",   // dropoffDatetime
+        "2025-05-01 00:00:00",   // dropoffDatetime
         "*",                  // puLocationID
         "*",                  // doLocationID
-        "true",                  // groupByPaymentType
-        "1",                     // vendorID
-        "green",                // taxiType
+        "false",                  // groupByPaymentType
+        "*",                     // vendorID
+        "*",                // taxiType
     )
     jvmArgs(
         "--enable-native-access=ALL-UNNAMED", // e.g. for DuckDB native load

@@ -27,7 +27,7 @@ public class TripAggregator {
     public static void main(String[] args) {
         // Arguments for query: [pickupDatetime, dropoffDatetime, puLocationID, doLocationID, groupByPayment, vendorID, taxiType]
         if (args.length != 7) {
-            System.out.println("Please provide the required arguments: startTime dropoff_datetime pu_location_id do_location_id groupByPayment vendorId  taxiType");
+            System.err.println("Please provide the required arguments: startTime dropoff_datetime pu_location_id do_location_id groupByPayment vendorId  taxiType");
             return;
         }
 
@@ -62,7 +62,7 @@ public class TripAggregator {
                     } else {
                         System.out.println("Vendor: all");
                     }
-                    if (groupByPayment) {
+                    if (groupByPayment && rs.getObject("payment_type") != null) {
                         System.out.println("Payment Type: " + PAYMENT_MAP.get(rs.getString("payment_type")));
                     } else {
                         System.out.println("Payment Type: all");
@@ -100,8 +100,12 @@ public class TripAggregator {
         List<String> filters = new ArrayList<>();
 
         // Apply filters when needed
-        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime) && dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
-            filters.add("pickup_datetime >= ? AND dropoff_datetime <= ?");
+        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime)) {
+            filters.add("pickup_datetime >= ?");
+        }
+
+        if (dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
+            filters.add("dropoff_datetime <= ?");
         }
 
         if (puLocationID != null && !EMPTY_VALUE.equals(puLocationID)) {
@@ -140,8 +144,11 @@ public class TripAggregator {
         // Set required parameters
         int index = 1;
 
-        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime) && dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
+        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime) ) {
             pstmt.setString(index++, pickupDatetime);
+        }
+
+        if (dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
             pstmt.setString(index++, dropoffDatetime);
         }
 

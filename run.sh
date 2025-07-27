@@ -4,35 +4,74 @@ set -euo pipefail
 # Regex for strict timestamp: YYYY-MM-DD HH:MM:SS
 TIMESTAMP_RE='^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$'
 
-prompt_timestamp() {
-  local prompt="$1" val
-  while true; do
-    read -r -p "$prompt (YYYY-MM-DD HH:MM:SS): " val
-    if [[ $val =~ $TIMESTAMP_RE ]]; then
-      echo "$val"; return
-    else
-      echo "  ↳ Invalid format. Please try again."
-    fi
-  done
-}
-
-prompt_int() {
-  local prompt="$1" val
-  while true; do
-    read -r -p "$prompt (integer): " val
-    if [[ $val =~ ^[0-9]+$ ]]; then
-      echo "$val"; return
-    else
-      echo "  ↳ Not a valid integer. Please try again."
-    fi
-  done
-}
-
 # ——— Main prompts ———
-pickup_datetime=$(prompt_timestamp "Enter pickup datetime")
-dropoff_datetime=$(prompt_timestamp "Enter dropoff datetime")
-pu_location_id=$(prompt_int      "Enter pickup location ID")
-do_location_id=$(prompt_int      "Enter dropoff location ID")
+while true; do
+  read -r -p "Enter pickup datetime (YYYY-MM-DD HH:MM:SS) [no pickup time lower bound]:" pickup_datetime
+
+  # Trim leading/trailing whitespace
+  pickup_datetime="${pickup_datetime#"${pickup_datetime%%[![:space:]]*}"}"
+  pickup_datetime="${pickup_datetime%"${pickup_datetime##*[![:space:]]}"}"
+
+  if [[ -z $pickup_datetime ]]; then
+    pickup_datetime="*"
+    break
+  elif [[ $dropoff_datetime =~ $TIMESTAMP_RE ]]; then
+    break
+  else
+    echo "  ↳ Not a valid timestamp. Try again or leave blank."
+  fi
+done
+
+while true; do
+  read -r -p "Enter dropoff datetime (YYYY-MM-DD HH:MM:SS) [no dropoff time uppper bound]:" dropoff_datetime
+
+  # Trim leading/trailing whitespace
+  dropoff_datetime="${dropoff_datetime#"${dropoff_datetime%%[![:space:]]*}"}"
+  dropoff_datetime="${dropoff_datetime%"${dropoff_datetime##*[![:space:]]}"}"
+
+  if [[ -z $dropoff_datetime ]]; then
+    dropoff_datetime="*"
+    break
+  elif [[ $dropoff_datetime =~ $TIMESTAMP_RE ]]; then
+    break
+  else
+    echo "  ↳ Not a valid timestamp. Try again or leave blank."
+  fi
+done
+
+while true; do
+  read -r -p "Enter pickup location ID (integer) [all pickup locations]:" pu_location_id
+
+  # Trim leading/trailing whitespace
+  pu_location_id="${pu_location_id#"${pu_location_id%%[![:space:]]*}"}"
+  pu_location_id="${pu_location_id%"${pu_location_id##*[![:space:]]}"}"
+
+  if [[ -z $pu_location_id ]]; then
+    pu_location_id="*"
+    break
+  elif [[ $pu_location_id =~ ^[0-9]+$ ]]; then
+    break
+  else
+    echo "  ↳ Not a valid integer. Enter a number or leave blank."
+  fi
+done
+
+while true; do
+  read -r -p "Enter pickup location ID (integer) [all pickup locations]:" do_location_id
+
+  # Trim leading/trailing whitespace
+  do_location_id="${do_location_id#"${do_location_id%%[![:space:]]*}"}"
+  do_location_id="${do_location_id%"${do_location_id##*[![:space:]]}"}"
+
+  if [[ -z $do_location_id ]]; then
+    do_location_id="*"
+    break
+  elif [[ $do_location_id =~ ^[0-9]+$ ]]; then
+    break
+  else
+    echo "  ↳ Not a valid integer. Enter a number or leave blank."
+  fi
+done
 
 # Group‐by‐payment‐type flag (default “true”)
 while true; do
@@ -50,17 +89,7 @@ while true; do
   esac
 done
 
-while true; do
-  read -r -p "Enter vendor ID (integer, or leave blank for all vendors): " vendor_id
-  if [[ -z $vendor_id ]]; then
-    vendor_id="*"
-    break
-  elif [[ $vendor_id =~ ^[0-9]+$ ]]; then
-    break
-  else
-    echo "  ↳ Not a valid integer. Enter a number or leave blank for all."
-  fi
-done
+vendor_id=$(prompt_int "Enter vendor ID (integer) [all vendors]")
 
 # Taxi type (default “both”)
 while true; do
