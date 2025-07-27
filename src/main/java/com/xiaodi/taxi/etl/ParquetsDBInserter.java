@@ -6,7 +6,7 @@ import java.nio.file.*;
 import java.sql.*;
 import java.util.stream.Stream;
 
-public class ParquetsIntoDuckDBs {
+public class ParquetsDBInserter {
 
     public static void main(String[] args) {
         String inputDir = "parquets";
@@ -32,7 +32,7 @@ public class ParquetsIntoDuckDBs {
                 // Create the trips table if it doesn't exist
                 stmt.execute("""
                     CREATE TABLE IF NOT EXISTS trips (
-                        vendorid INTEGER,
+                        vendor_id INTEGER,
                         pickup_datetime TIMESTAMP,
                         dropoff_datetime TIMESTAMP,
                         passenger_count INTEGER,
@@ -88,12 +88,14 @@ public class ParquetsIntoDuckDBs {
                                         }
                                     }
 
+                                    rs.close();
+
                                     // Normalize columns and insert into the main table
                                     if (taxiType != null) {
                                         stmt.execute(String.format("""
                                          INSERT INTO trips
                                          SELECT
-                                             VendorID as vendorid,
+                                             VendorID as vendor_id,
                                              %s AS pickup_datetime,
                                              %s AS dropoff_datetime,
                                              RatecodeID as rate_code_id,
@@ -122,7 +124,6 @@ public class ParquetsIntoDuckDBs {
                                     e.printStackTrace(); // Handle exceptions during each file processing
                                 }
                             });
-
                     System.out.println("🎉 ETL split complete. One DB per file written to: " + outputDir);
                 }
             }
