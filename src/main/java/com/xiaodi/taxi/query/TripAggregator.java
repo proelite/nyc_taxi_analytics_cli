@@ -1,6 +1,8 @@
 package com.xiaodi.taxi.query;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class TripAggregator {
@@ -31,8 +33,8 @@ public class TripAggregator {
 
         String pickupDatetime = args[0];  // Timestamp (start time for trips)
         String dropoffDatetime = args[1];    // Timestamp (end time for trips)
-        int puLocationID = Integer.parseInt(args[2]); // Start location id
-        int doLocationID = Integer.parseInt(args[3]);   // End location id
+        String puLocationID = args[2]; // Start location id
+        String doLocationID = args[3];   // End location id
         boolean groupByPayment = Boolean.parseBoolean(args[4]);
         String vendorID = args[5];         // Vendor ID
         String taxiType = args[6];                         // Taxi type (yellow, green)
@@ -41,7 +43,7 @@ public class TripAggregator {
 
         // Initialize the connection to DuckDB
         try (Connection conn = DriverManager.getConnection("jdbc:duckdb:" + dbPath)) {
-            String query = buildQuery(groupByPayment, vendorID, taxiType);
+            String query = buildQuery(pickupDatetime, dropoffDatetime, puLocationID, doLocationID, groupByPayment, vendorID, taxiType);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setQueryParameters(stmt, pickupDatetime, dropoffDatetime, puLocationID, doLocationID, vendorID, taxiType);
                 ResultSet rs = stmt.executeQuery();
@@ -81,33 +83,49 @@ public class TripAggregator {
         }
     }
 
-    private static String buildQuery(boolean groupByPayment, String vendorID, String taxiType) {
+    private static String buildQuery(String pickupDatetime, String dropoffDatetime, String puLocationID, String doLocationID, boolean groupByPayment, String vendorID, String taxiType) {
         StringBuilder query = new StringBuilder("SELECT ");
         query.append("MIN(fare_amount) AS min_fare, ");
         query.append("MAX(fare_amount) AS max_fare, ");
         query.append("COUNT(*) AS trip_count, ");
         query.append("SUM(fare_amount) AS total_fare, ");
         query.append("SUM(tolls_amount) AS total_toll_fare, ");
+
         if (groupByPayment) {
             query.append("payment_type, ");
         }
 
         query.append("FROM trips ");
 
-        // Apply filters (all required parameters)
-        query.append("WHERE pickup_datetime >= ? AND dropoff_datetime <= ? ");
-        query.append("AND pu_location_id = ? ");
-        query.append("AND do_location_id = ? ");
-        if (vendorID != null && !EMPTY_VALUE.equals(vendorID)) {
-            query.append("AND vendor_id = ? ");
+        List<String> filters = new ArrayList<>();
+
+        // Apply filters when needed
+        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime) && dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
+            filters.add("pickup_datetime >= ? AND dropoff_datetime <= ?");
         }
 
-        // Add taxi type filter only when needed
+        if (puLocationID != null && !EMPTY_VALUE.equals(puLocationID)) {
+            filters.add("pu_location_id = ?");
+        }
+
+        if (doLocationID != null && !EMPTY_VALUE.equals(doLocationID)) {
+            filters.add("do_location_id = ?");
+        }
+
+        if (vendorID != null && !EMPTY_VALUE.equals(vendorID)) {
+            filters.add("vendor_id = ?");
+        }
+
         if (taxiType != null && !EMPTY_VALUE.equals(taxiType)) {
             if ("yellow".equalsIgnoreCase(taxiType) || "green".equalsIgnoreCase(taxiType)) {
-                query.append("AND taxi_type = ? ");
+                filters.add("taxi_type = ? ");
             }
             // "both" case - no additional filter needed
+        }
+
+        if (!filters.isEmpty()) {
+            query.append("WHERE ");
+            query.append(String.join(" AND ", filters));
         }
 
         if (groupByPayment) {
@@ -118,19 +136,27 @@ public class TripAggregator {
     }
 
     // Helper method to set parameters in PreparedStatement
-    private static void setQueryParameters(PreparedStatement pstmt, String pickupDatetime, String dropoffDatetime,
-                                           int puLocationID, int doLocationID, String vendorID, String taxiType) throws SQLException {
+    private static void setQueryParameters(PreparedStatement pstmt, String pickupDatetime, String dropoffDatetime, String puLocationID, String doLocationID, String vendorID, String taxiType) throws SQLException {
         // Set required parameters
         int index = 1;
-        pstmt.setString(index++, pickupDatetime);
-        pstmt.setString(index++, dropoffDatetime);
-        pstmt.setInt(index++, puLocationID);
-        pstmt.setInt(index++, doLocationID);
+
+        if (pickupDatetime != null && !EMPTY_VALUE.equals(pickupDatetime) && dropoffDatetime != null && !EMPTY_VALUE.equals(dropoffDatetime)) {
+            pstmt.setString(index++, pickupDatetime);
+            pstmt.setString(index++, dropoffDatetime);
+        }
+
+        if (puLocationID != null && !EMPTY_VALUE.equals(puLocationID)) {
+            pstmt.setInt(index++, Integer.parseInt(puLocationID));
+        }
+
+        if (doLocationID != null && !EMPTY_VALUE.equals(doLocationID)) {
+            pstmt.setInt(index++, Integer.parseInt(doLocationID));
+        }
+
         if (vendorID != null && !EMPTY_VALUE.equals(vendorID)) {
             pstmt.setInt(index++, Integer.parseInt(vendorID));
         }
 
-        // Set optional taxi type parameter
         if (taxiType != null && !taxiType.isEmpty()) {
             if ("yellow".equalsIgnoreCase(taxiType) || "green".equalsIgnoreCase(taxiType)) {
                 pstmt.setString(index, taxiType.toLowerCase());
