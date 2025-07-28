@@ -92,9 +92,10 @@ Example output:
 └── src/
     └── main/java/com/xiaodi/taxi
                              ├── etl
-                             │   ├── ...interfaces    
+                             │   ├── ...interfaces and helper classes    
                              │   └── ParquetsDBInserter.java    # Inserts Parquets into DuckDB
                              ├── query
+                             │   ├── ...interfaces and helper classes
                              │   └── TripAggregator.java        # Executes aggregate query on DuckDB
                              └── utils
                                  └── ParquetsDownloader.java  # Downloads Parquet files from hardcoded links within the file. 
