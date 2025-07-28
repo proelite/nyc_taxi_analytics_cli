@@ -33,6 +33,12 @@ public class TripAggregatorService {
         this.connection = conn;
     }
 
+    /**
+     * The aggregate step which executes the query.
+     * @param params The query params.
+     * @return a list of {@link TripAggregationResult}
+     * @throws SQLException
+     */
     public List<TripAggregationResult> aggregate(TripQueryParams params) throws SQLException {
         String sql = buildQuery(params);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -50,7 +56,7 @@ public class TripAggregatorService {
         }
         q.append(" FROM trips");
 
-        var filters = getStrings(p);
+        var filters = getFilters(p);
         if (!filters.isEmpty()) {
             q.append(" WHERE ")
                     .append(String.join(" AND ", filters));
@@ -61,7 +67,12 @@ public class TripAggregatorService {
         return q.toString();
     }
 
-    private static @NotNull ArrayList<String> getStrings(@NotNull TripQueryParams p) {
+    /**
+     *
+     * @param p query params.
+     * @return list of string filters.
+     */
+    private static @NotNull ArrayList<String> getFilters(@NotNull TripQueryParams p) {
         var filters = new ArrayList<String>();
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getPickupDatetime())) filters.add("pickup_datetime >= ?");
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getDropoffDatetime())) filters.add("dropoff_datetime <= ?");

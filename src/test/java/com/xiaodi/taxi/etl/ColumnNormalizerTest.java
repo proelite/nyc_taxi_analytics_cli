@@ -7,16 +7,16 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class SchemaInspectorTest {
+public class ColumnNormalizerTest {
     @Test
-    void testInspectWithTpepColumns() throws SQLException {
+    void testNormalizeWithTpepColumns() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         when(rs.next()).thenReturn(true, true, false);
         when(rs.getString("name"))
                 .thenReturn("tpep_pickup_datetime", "tpep_dropoff_datetime");
 
-        SchemaInspector inspector = new SchemaInspector();
-        ColumnInfo info = inspector.inspect(rs);
+        ColumnNormalizer inspector = new ColumnNormalizer();
+        ColumnInfo info = inspector.normalize(rs);
 
         assertEquals("tpep_pickup_datetime", info.pickupColumn());
         assertEquals("tpep_dropoff_datetime", info.dropoffColumn());
@@ -25,14 +25,14 @@ public class SchemaInspectorTest {
     }
 
     @Test
-    void testInspectWithLpepColumns() throws SQLException {
+    void testNormalizeWithLpepColumns() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         when(rs.next()).thenReturn(true, true, false);
         when(rs.getString("name"))
                 .thenReturn("lpep_pickup_datetime", "lpep_dropoff_datetime");
 
-        SchemaInspector inspector = new SchemaInspector();
-        ColumnInfo info = inspector.inspect(rs);
+        ColumnNormalizer inspector = new ColumnNormalizer();
+        ColumnInfo info = inspector.normalize(rs);
 
         assertEquals("lpep_pickup_datetime", info.pickupColumn());
         assertEquals("lpep_dropoff_datetime", info.dropoffColumn());

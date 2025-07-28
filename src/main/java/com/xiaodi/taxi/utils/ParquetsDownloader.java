@@ -6,6 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 
+/**
+ * Util file to download hardcoded links into the parquets folder.
+ */
 public class ParquetsDownloader {
 
     private static final String[] PARQUET_URLS = {

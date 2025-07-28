@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.*;
 import java.util.List;
 
+/**
+ * This class is entry point to execute a query for trip aggregates using the main method.
+ */
 public class TripAggregator {
     public static final String ANSI_BOLD  = "\u001B[1m";
     public static final String ANSI_RESET = "\u001B[0m";

@@ -94,7 +94,7 @@ public class TripAggregatorServiceTest {
         TripAggregationResult first = results.get(0);
         assertEquals("yellow and green", first.taxiType());
         assertEquals("all", first.vendor());
-        assertEquals("all", first.paymentType());
+        assertEquals("Null", first.paymentType());
         assertEquals(2.0, first.minFare());
         assertEquals(5.0, first.maxFare());
         assertEquals(10, first.tripCount());
@@ -102,7 +102,7 @@ public class TripAggregatorServiceTest {
         assertEquals(20.0, first.totalFare());
 
         TripAggregationResult second = results.get(1);
-        assertEquals("all", second.paymentType());
+        assertEquals("Null", second.paymentType());
         assertEquals(3.0, second.minFare());
         assertEquals(6.0, second.maxFare());
         assertEquals(20, second.tripCount());

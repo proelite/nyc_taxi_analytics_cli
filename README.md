@@ -89,13 +89,19 @@ Example output:
 ├── parquets/                  # Directory where Parquet files will be downloaded
 ├── duck-db/                   # Directory containing the DuckDB database file
 │   └── nyc_taxi_combined.duckdb
-└── src/main/java
-    └── com/xiaodi/taxi
-        ├── etl
-        │   ├── ParquetsDownloader.java    # Downloads Parquet files from hardcoded links within the file. 
-        │   └── ParquetsDBInserter.java     # Inserts Parquets into DuckDB
-        └── query
-            └── TripAggregator.java        # Executes aggregate query on DuckDB
+└── src/
+    └── main/java/com/xiaodi/taxi
+                             ├── etl
+                             │   ├── ...interfaces    
+                             │   └── ParquetsDBInserter.java    # Inserts Parquets into DuckDB
+                             ├── query
+                             │   └── TripAggregator.java        # Executes aggregate query on DuckDB
+                             └── utils
+                                 └── ParquetsDownloader.java  # Downloads Parquet files from hardcoded links within the file. 
+    └── integrationTest/java
+                        └── TrigAggregatorServiceIntegrationTest.java 
+    └── test/java
+                        └── ...unit tests                                                          
 ```
 
 ## Gradle Tasks
