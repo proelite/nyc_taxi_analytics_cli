@@ -23,14 +23,14 @@ tasks.register<JavaExec>("downloadParquets") {
     group = "etl"
     description = "Fetches parquets from links"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("com.xiaodi.taxi.utils.ParquetsDownloader")
+    mainClass.set("com.xiaodi.taxi.etl.ParquetsDownloader")
 }
 
 tasks.register<JavaExec>("insertParquetsIntoDBs") {
     group = "etl"
     description = "Scans parquets and insert into the DuckDB database"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("com.xiaodi.taxi.etl.ParquetsDBInserter")
+    mainClass.set("com.xiaodi.taxi.etl.DBInserter")
     jvmArgs(
         "--enable-native-access=ALL-UNNAMED", // e.g. for DuckDB native load
     )

@@ -93,12 +93,13 @@ Example output:
     └── main/java/com/xiaodi/taxi
                              ├── etl
                              │   ├── ...interfaces and helper classes    
-                             │   └── ParquetsDBInserter.java    # Inserts Parquets into DuckDB
-                             ├── query
-                             │   ├── ...interfaces and helper classes
-                             │   └── TripAggregator.java        # Executes aggregate query on DuckDB
-                             └── utils
-                                 └── ParquetsDownloader.java  # Downloads Parquet files from hardcoded links within the file. 
+                             │   ├── ParquetsDownloader.java  # Downloads Parquet files from hardcoded links within the file. 
+                             │   └── DBInserter.java          # Inserts Parquets into DuckDB
+                             └── query
+                                 ├── ...interfaces and helper classes
+                                 └── TripAggregator.java        # Executes aggregate query on DuckDB
+                             
+                                 
     └── integrationTest/java
                         └── TrigAggregatorServiceIntegrationTest.java 
     └── test/java

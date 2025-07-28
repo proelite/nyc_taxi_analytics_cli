@@ -12,11 +12,11 @@ import java.util.stream.Stream;
 /**
  * ETL class to insert all parquets in parquets folder into the duckdb in duck-db/nyc_taxi_combined.duckdb
  */
-public class ParquetsDBInserter {
+public class DBInserter {
     public static void main(String[] args) {
         Path inputDir = Paths.get("parquets");
         Path outputFile = Paths.get("duck-db", "nyc_taxi_combined.duckdb");
-        ParquetsDBInserter app = new ParquetsDBInserter(
+        DBInserter app = new DBInserter(
                 new DefaultDirectoryScanner(),
                 new DefaultConnectionFactory()
         );
@@ -35,7 +35,7 @@ public class ParquetsDBInserter {
      * @param directoryScanner An instance of a directory scanner.
      * @param ConnectionFactory An instance of a connection factory.
      */
-    public ParquetsDBInserter(DirectoryScanner directoryScanner, ConnectionFactory ConnectionFactory) {
+    public DBInserter(DirectoryScanner directoryScanner, ConnectionFactory ConnectionFactory) {
         this.directoryScanner = directoryScanner;
         this.ConnectionFactory = ConnectionFactory;
     }
