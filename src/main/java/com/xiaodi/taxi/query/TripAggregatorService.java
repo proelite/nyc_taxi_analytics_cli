@@ -29,7 +29,7 @@ public class TripAggregatorService {
 
     private final Connection connection;
 
-    TripAggregatorService(Connection conn) {
+    public TripAggregatorService(Connection conn) {
         this.connection = conn;
     }
 
@@ -101,9 +101,8 @@ public class TripAggregatorService {
                     ? "all"
                     : VENDOR_MAP.get(p.getVendorID());
 
-            String payment = p.isGroupByPayment() && rs.getObject("payment_type") != null
-                    ? PAYMENT_MAP.getOrDefault(rs.getString("payment_type"), "all")
-                    : "all";
+            String payment = p.isGroupByPayment() ? rs.getObject("payment_type") != null
+                            ? PAYMENT_MAP.getOrDefault(rs.getString("payment_type"), "all") : "Null" : "all";
 
             results.add(new TripAggregationResult(
                     taxiType,

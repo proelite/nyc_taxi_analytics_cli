@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation("org.duckdb:duckdb_jdbc:0.9.2")
     implementation("org.jetbrains:annotations:23.0.0")
+    implementation("org.apiguardian:apiguardian-api:1.1.2")
     testImplementation(platform("org.junit:junit-bom:5.10.2")) // Use the latest stable version
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.mockito:mockito-core:5.+")
