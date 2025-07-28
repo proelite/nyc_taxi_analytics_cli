@@ -1,4 +1,4 @@
-package com.xiaodi.taxi.query;
+package com.xiaodi.taxi.query.models;
 
 /**
  * Represents an aggregated result row.

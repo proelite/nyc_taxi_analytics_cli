@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.etl;
 
+import com.xiaodi.taxi.etl.sql.SQLBuilder;
+import com.xiaodi.taxi.etl.sql.SQLExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -94,12 +96,6 @@ class DefaultConnectionFactory implements ConnectionFactory {
     @Override
     public Connection getConnection(String url) throws SQLException {
         return DriverManager.getConnection(url);
-    }
-}
-
-record ColumnInfo(String pickupColumn, String dropoffColumn, String taxiType) {
-    boolean hasTaxiType() {
-        return taxiType != null;
     }
 }
 

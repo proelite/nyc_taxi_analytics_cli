@@ -1,11 +1,12 @@
-package com.xiaodi.taxi.etl;
+package com.xiaodi.taxi.etl.sql;
 
+import com.xiaodi.taxi.etl.model.NormalizedColumns;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class SQLBuilder {
     @Contract(pure = true)
-    static @NotNull String createTripsTable() {
+    public static @NotNull String createTripsTable() {
         return "CREATE TABLE IF NOT EXISTS trips (" +
                 "vendor_id INTEGER, pickup_datetime TIMESTAMP, dropoff_datetime TIMESTAMP, " +
                 "passenger_count INTEGER, trip_distance DOUBLE, rate_code_id INTEGER, " +
@@ -16,7 +17,7 @@ public class SQLBuilder {
                 ")";
     }
 
-    static @NotNull String buildInsertSql(@NotNull ColumnInfo info) {
+    public static @NotNull String buildInsertSql(@NotNull NormalizedColumns info) {
         return String.format(
                 "INSERT INTO trips SELECT VendorID as vendor_id, %s AS pickup_datetime, %s AS dropoff_datetime, " +
                         "RatecodeID as rate_code_id, PULocationID as pu_location_id, DOLocationID as do_location_id, " +

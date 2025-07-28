@@ -1,5 +1,6 @@
-package com.xiaodi.taxi.etl;
+package com.xiaodi.taxi.etl.sql;
 
+import com.xiaodi.taxi.etl.model.NormalizedColumns;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -9,21 +10,21 @@ import java.sql.Statement;
 
 public class SQLExecutor {
     private final Statement stmt;
-    private final ColumnNormalizer inspector;
+    private final ColumnNormalizer normalizer;
 
-    SQLExecutor(Statement stmt) {
+    public SQLExecutor(Statement stmt) {
         this.stmt = stmt;
-        this.inspector = new ColumnNormalizer();
+        this.normalizer = new ColumnNormalizer();
     }
 
-    void execute(@NotNull Path file) throws SQLException {
+    public void execute(@NotNull Path file) throws SQLException {
         String path = file.toAbsolutePath().toString().replace("\\", "\\\\");
         stmt.execute(String.format(
                 "CREATE TABLE temp_trips AS SELECT * FROM read_parquet('%s')", path
         ));
 
         try (ResultSet rs = stmt.executeQuery("PRAGMA table_info(temp_trips)")) {
-            ColumnInfo info = inspector.normalize(rs);
+            NormalizedColumns info = normalizer.normalize(rs);
             if (info.hasTaxiType()) {
                 stmt.execute(SQLBuilder.buildInsertSql(info));
             }

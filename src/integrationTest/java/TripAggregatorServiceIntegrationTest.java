@@ -1,6 +1,6 @@
-import com.xiaodi.taxi.query.TripAggregationResult;
+import com.xiaodi.taxi.query.models.TripAggregationResult;
 import com.xiaodi.taxi.query.TripAggregatorService;
-import com.xiaodi.taxi.query.TripQueryParams;
+import com.xiaodi.taxi.query.models.TripQueryParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

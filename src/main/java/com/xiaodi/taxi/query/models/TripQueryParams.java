@@ -1,4 +1,4 @@
-package com.xiaodi.taxi.query;
+package com.xiaodi.taxi.query.models;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

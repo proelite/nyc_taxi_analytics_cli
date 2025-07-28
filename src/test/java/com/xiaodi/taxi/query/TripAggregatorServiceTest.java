@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.query;
 
+import com.xiaodi.taxi.query.models.TripAggregationResult;
+import com.xiaodi.taxi.query.models.TripQueryParams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,12 +1,13 @@
-package com.xiaodi.taxi.etl;
+package com.xiaodi.taxi.etl.sql;
 
+import com.xiaodi.taxi.etl.model.NormalizedColumns;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ColumnNormalizer {
-    ColumnInfo normalize(@NotNull ResultSet rs) throws SQLException {
+    public NormalizedColumns normalize(@NotNull ResultSet rs) throws SQLException {
         String pickup = null, dropoff = null, type = null;
         while (rs.next()) {
             String col = rs.getString("name");
@@ -21,6 +22,6 @@ public class ColumnNormalizer {
                 dropoff = col;
             }
         }
-        return new ColumnInfo(pickup, dropoff, type);
+        return new NormalizedColumns(pickup, dropoff, type);
     }
 }

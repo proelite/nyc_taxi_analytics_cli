@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.etl;
 
+import com.xiaodi.taxi.etl.model.NormalizedColumns;
+import com.xiaodi.taxi.etl.sql.SQLBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +17,7 @@ public class SQLBuilderTest {
 
     @Test
     void testBuildInsertSql() {
-        ColumnInfo info = new ColumnInfo("pickup", "dropoff", "green");
+        NormalizedColumns info = new NormalizedColumns("pickup", "dropoff", "green");
         String sql = SQLBuilder.buildInsertSql(info);
         assertTrue(sql.contains("INSERT INTO trips"));
         assertTrue(sql.contains("pickup AS pickup_datetime"));

@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.query;
 
+import com.xiaodi.taxi.query.models.TripAggregationResult;
+import com.xiaodi.taxi.query.models.TripQueryParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;

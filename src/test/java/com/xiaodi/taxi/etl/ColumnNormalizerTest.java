@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.etl;
 
+import com.xiaodi.taxi.etl.model.NormalizedColumns;
+import com.xiaodi.taxi.etl.sql.ColumnNormalizer;
 import org.junit.jupiter.api.Test;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,8 +17,8 @@ public class ColumnNormalizerTest {
         when(rs.getString("name"))
                 .thenReturn("tpep_pickup_datetime", "tpep_dropoff_datetime");
 
-        ColumnNormalizer inspector = new ColumnNormalizer();
-        ColumnInfo info = inspector.normalize(rs);
+        ColumnNormalizer normalizer = new ColumnNormalizer();
+        NormalizedColumns info = normalizer.normalize(rs);
 
         assertEquals("tpep_pickup_datetime", info.pickupColumn());
         assertEquals("tpep_dropoff_datetime", info.dropoffColumn());
@@ -31,8 +33,8 @@ public class ColumnNormalizerTest {
         when(rs.getString("name"))
                 .thenReturn("lpep_pickup_datetime", "lpep_dropoff_datetime");
 
-        ColumnNormalizer inspector = new ColumnNormalizer();
-        ColumnInfo info = inspector.normalize(rs);
+        ColumnNormalizer normalizer = new ColumnNormalizer();
+        NormalizedColumns info = normalizer.normalize(rs);
 
         assertEquals("lpep_pickup_datetime", info.pickupColumn());
         assertEquals("lpep_dropoff_datetime", info.dropoffColumn());
