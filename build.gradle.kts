@@ -18,15 +18,6 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
 }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-    // Optional: Configure test logging or other settings
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = true
-    }
-}
-
 tasks.register<JavaExec>("downloadParquets") {
     group = "etl"
     description = "Fetches parquets from links"
@@ -68,4 +59,36 @@ tasks.register<JavaExec>("executeQuery") {
     jvmArgs(
         "--enable-native-access=ALL-UNNAMED", // e.g. for DuckDB native load
     )
+}
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+    // Optional: Configure test logging or other settings
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}
+
+sourceSets {
+    val integrationTest by creating {
+        java.srcDir("src/integrationTest/java")
+        resources.srcDir("src/integrationTest/resources")
+        compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+val integrationTest = tasks.register<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+    include("**/*IntegrationTest.class", "**/*IT.class", "**/*Test.class")
+    shouldRunAfter(tasks.test)
+    useJUnitPlatform()
+}
+
+// hook it into the build lifecycle
+tasks.check {
+    dependsOn(integrationTest)
 }
