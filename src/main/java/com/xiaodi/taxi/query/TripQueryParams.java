@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Value object holding aggregation parameters. Immutable and easy to build/test.
+ * Value object holding aggregation parameters.
  */
 public final class TripQueryParams {
     public static String EMPTY_VALUE = "*";

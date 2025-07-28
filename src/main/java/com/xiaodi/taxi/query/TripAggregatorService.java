@@ -17,7 +17,7 @@ public class TripAggregatorService {
             "7", "Helix"
     );
 
-    private static final Map<String, String> PAYMENT_MAP = Map.of(
+    public static final Map<String, String> PAYMENT_MAP = Map.of(
             "0", "Flex Fare trip",
             "1", "Credit card",
             "2", "Cash",
