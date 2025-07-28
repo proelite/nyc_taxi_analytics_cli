@@ -1,5 +1,8 @@
 package com.xiaodi.taxi.query;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Value object holding aggregation parameters. Immutable and easy to build/test.
  */
@@ -14,7 +17,8 @@ public final class TripQueryParams {
     private final String vendorID;
     private final String taxiType;
 
-    private TripQueryParams(Builder b) {
+    @Contract(pure = true)
+    private TripQueryParams(@NotNull Builder b) {
         this.pickupDatetime = b.pickupDatetime;
         this.dropoffDatetime = b.dropoffDatetime;
         this.puLocationID = b.puLocationID;
@@ -24,7 +28,8 @@ public final class TripQueryParams {
         this.taxiType = b.taxiType;
     }
 
-    public static Builder builder() { return new Builder(); }
+    @Contract(" -> new")
+    public static @NotNull Builder builder() { return new Builder(); }
     public static final class Builder {
         private String pickupDatetime = EMPTY_VALUE;
         private String dropoffDatetime = EMPTY_VALUE;
@@ -41,7 +46,8 @@ public final class TripQueryParams {
         public Builder groupByPayment(boolean flag) { this.groupByPayment = flag; return this; }
         public Builder vendorID(String id) { this.vendorID = id; return this; }
         public Builder taxiType(String type) { this.taxiType = type; return this; }
-        public TripQueryParams build() { return new TripQueryParams(this); }
+        @Contract(value = " -> new", pure = true)
+        public @NotNull TripQueryParams build() { return new TripQueryParams(this); }
     }
 
     // getters...

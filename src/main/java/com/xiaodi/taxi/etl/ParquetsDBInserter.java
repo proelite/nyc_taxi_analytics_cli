@@ -1,5 +1,8 @@
 package com.xiaodi.taxi.etl;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.sql.*;
@@ -38,7 +41,7 @@ public class ParquetsDBInserter {
         }
     }
 
-    private void ensureOutputDirectoryExists(Path outputFile) throws IOException {
+    private void ensureOutputDirectoryExists(@NotNull Path outputFile) throws IOException {
         Path parent = outputFile.getParent();
         if (parent != null && Files.notExists(parent)) {
             Files.createDirectories(parent);
@@ -92,7 +95,7 @@ class FileProcessor {
         this.inspector = new SchemaInspector();
     }
 
-    void process(Path file) throws SQLException {
+    void process(@NotNull Path file) throws SQLException {
         String path = file.toAbsolutePath().toString().replace("\\", "\\\\");
         stmt.execute(String.format(
                 "CREATE TABLE temp_trips AS SELECT * FROM read_parquet('%s')", path
@@ -110,7 +113,7 @@ class FileProcessor {
 }
 
 class SchemaInspector {
-    ColumnInfo inspect(ResultSet rs) throws SQLException {
+    ColumnInfo inspect(@NotNull ResultSet rs) throws SQLException {
         String pickup = null, dropoff = null, type = null;
         while (rs.next()) {
             String col = rs.getString("name");
@@ -136,7 +139,8 @@ record ColumnInfo(String pickupColumn, String dropoffColumn, String taxiType) {
 }
 
 class SQLBuilder {
-    static String createTripsTable() {
+    @Contract(pure = true)
+    static @NotNull String createTripsTable() {
         return "CREATE TABLE IF NOT EXISTS trips (" +
                 "vendor_id INTEGER, pickup_datetime TIMESTAMP, dropoff_datetime TIMESTAMP, " +
                 "passenger_count INTEGER, trip_distance DOUBLE, rate_code_id INTEGER, " +
@@ -147,7 +151,7 @@ class SQLBuilder {
                 ")";
     }
 
-    static String buildInsertSql(ColumnInfo info) {
+    static @NotNull String buildInsertSql(@NotNull ColumnInfo info) {
         return String.format(
                 "INSERT INTO trips SELECT VendorID as vendor_id, %s AS pickup_datetime, %s AS dropoff_datetime, " +
                         "RatecodeID as rate_code_id, PULocationID as pu_location_id, DOLocationID as do_location_id, " +

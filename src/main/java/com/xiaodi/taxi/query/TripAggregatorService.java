@@ -1,5 +1,7 @@
 package com.xiaodi.taxi.query;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.*;
 import java.util.*;
 
@@ -41,13 +43,25 @@ public class TripAggregatorService {
         }
     }
 
-    String buildQuery(TripQueryParams p) {
+    String buildQuery(@NotNull TripQueryParams p) {
         StringBuilder q = new StringBuilder("SELECT MIN(fare_amount) AS min_fare, MAX(fare_amount) AS max_fare, COUNT(*) AS trip_count, SUM(fare_amount) AS total_fare, SUM(tolls_amount) AS total_toll_fare");
         if (p.isGroupByPayment()) {
             q.append(", payment_type");
         }
         q.append(" FROM trips");
 
+        var filters = getStrings(p);
+        if (!filters.isEmpty()) {
+            q.append(" WHERE ")
+                    .append(String.join(" AND ", filters));
+        }
+        if (p.isGroupByPayment()) {
+            q.append(" GROUP BY payment_type");
+        }
+        return q.toString();
+    }
+
+    private static @NotNull ArrayList<String> getStrings(@NotNull TripQueryParams p) {
         var filters = new ArrayList<String>();
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getPickupDatetime())) filters.add("pickup_datetime >= ?");
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getDropoffDatetime())) filters.add("dropoff_datetime <= ?");
@@ -59,17 +73,10 @@ public class TripAggregatorService {
                 filters.add("taxi_type = ?");
             }
         }
-        if (!filters.isEmpty()) {
-            q.append(" WHERE ")
-                    .append(String.join(" AND ", filters));
-        }
-        if (p.isGroupByPayment()) {
-            q.append(" GROUP BY payment_type");
-        }
-        return q.toString();
+        return filters;
     }
 
-    void bindParameters(PreparedStatement stmt, TripQueryParams p) throws SQLException {
+    void bindParameters(PreparedStatement stmt, @NotNull TripQueryParams p) throws SQLException {
         int idx = 1;
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getPickupDatetime())) stmt.setString(idx++, p.getPickupDatetime());
         if (!TripQueryParams.EMPTY_VALUE.equals(p.getDropoffDatetime())) stmt.setString(idx++, p.getDropoffDatetime());
@@ -83,7 +90,7 @@ public class TripAggregatorService {
         }
     }
 
-    List<TripAggregationResult> mapResults(ResultSet rs, TripQueryParams p) throws SQLException {
+    List<TripAggregationResult> mapResults(@NotNull ResultSet rs, TripQueryParams p) throws SQLException {
         List<TripAggregationResult> results = new ArrayList<>();
         while (rs.next()) {
             String taxiType = TripQueryParams.EMPTY_VALUE.equals(p.getTaxiType())

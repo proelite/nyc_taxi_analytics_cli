@@ -46,9 +46,9 @@ You’ll be prompted for:
     
 * **Dropoff datetime**: YYYY-MM-DD HH:MM:SS (default: skip)
     
-* **Pickup location ID** An integer (e.g. 1)
+* **Pickup location ID** An integer (e.g. 1) (default: skip)
     
-* **Dropoff location ID** An integer (e.g. 2)
+* **Dropoff location ID** An integer (e.g. 2) (default: skip)
     
 * **Group by payment type?** Enter true or false (default: true)
     
