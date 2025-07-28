@@ -4,7 +4,7 @@ This project automates downloading NYC taxi trip Parquet data, loading it into a
 
 ## Prerequisites
 
-* **Java 11+** (JDK must be installed and on your PATH)
+* **Java 14+** (JDK must be installed and on your PATH)
 * **Gradle wrapper** (`gradlew`) or a local Gradle installation
 * **Internet access** to install Gradle dependencies and fetch Parquet files 
 

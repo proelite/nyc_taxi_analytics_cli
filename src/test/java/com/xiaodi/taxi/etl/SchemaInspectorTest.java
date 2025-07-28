@@ -18,9 +18,9 @@ public class SchemaInspectorTest {
         SchemaInspector inspector = new SchemaInspector();
         ColumnInfo info = inspector.inspect(rs);
 
-        assertEquals("tpep_pickup_datetime", info.getPickupColumn());
-        assertEquals("tpep_dropoff_datetime", info.getDropoffColumn());
-        assertEquals("yellow", info.getTaxiType());
+        assertEquals("tpep_pickup_datetime", info.pickupColumn());
+        assertEquals("tpep_dropoff_datetime", info.dropoffColumn());
+        assertEquals("yellow", info.taxiType());
         assertTrue(info.hasTaxiType());
     }
 
@@ -34,9 +34,9 @@ public class SchemaInspectorTest {
         SchemaInspector inspector = new SchemaInspector();
         ColumnInfo info = inspector.inspect(rs);
 
-        assertEquals("lpep_pickup_datetime", info.getPickupColumn());
-        assertEquals("lpep_dropoff_datetime", info.getDropoffColumn());
-        assertEquals("green", info.getTaxiType());
+        assertEquals("lpep_pickup_datetime", info.pickupColumn());
+        assertEquals("lpep_dropoff_datetime", info.dropoffColumn());
+        assertEquals("green", info.taxiType());
         assertTrue(info.hasTaxiType());
     }
 }

@@ -11,12 +11,10 @@ repositories {
 
 dependencies {
     implementation("org.duckdb:duckdb_jdbc:0.9.2")
-    compileOnly("org.projectlombok:lombok:1.18.30") // Use the latest version
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    implementation("org.jetbrains:annotations:23.0.0")
     testImplementation(platform("org.junit:junit-bom:5.10.2")) // Use the latest stable version
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.mockito:mockito-core:5.+")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 }
 
 tasks.named<Test>("test") {
@@ -59,7 +57,7 @@ tasks.register<JavaExec>("executeQuery") {
     // default positional args to your Java main()
     args(
         "*",   // pickupDatetime
-        "2025-05-01 00:00:00",   // dropoffDatetime
+        "*",   // dropoffDatetime
         "*",                  // puLocationID
         "*",                  // doLocationID
         "true",                  // groupByPaymentType

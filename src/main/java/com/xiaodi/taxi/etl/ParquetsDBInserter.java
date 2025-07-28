@@ -66,7 +66,7 @@ public class ParquetsDBInserter {
     }
 }
 
-// ---- Supporting Interfaces and Classes ----
+// ---- Classes ----
 
 class DefaultDirectoryScanner implements DirectoryScanner {
     @Override
@@ -129,23 +129,10 @@ class SchemaInspector {
     }
 }
 
-class ColumnInfo {
-    private final String pickupColumn;
-    private final String dropoffColumn;
-    private final String taxiType;
-
-    ColumnInfo(String pickup, String dropoff, String taxiType) {
-        this.pickupColumn = pickup;
-        this.dropoffColumn = dropoff;
-        this.taxiType = taxiType;
-    }
-
+record ColumnInfo(String pickupColumn, String dropoffColumn, String taxiType) {
     boolean hasTaxiType() {
         return taxiType != null;
     }
-    String getPickupColumn() { return pickupColumn; }
-    String getDropoffColumn() { return dropoffColumn; }
-    String getTaxiType() { return taxiType; }
 }
 
 class SQLBuilder {
@@ -167,7 +154,7 @@ class SQLBuilder {
                         "passenger_count, trip_distance, payment_type, fare_amount, extra, mta_tax, tip_amount, " +
                         "tolls_amount, improvement_surcharge, total_amount, congestion_surcharge, '%s' AS taxi_type " +
                         "FROM temp_trips",
-                info.getPickupColumn(), info.getDropoffColumn(), info.getTaxiType()
+                info.pickupColumn(), info.dropoffColumn(), info.taxiType()
         );
     }
 }
